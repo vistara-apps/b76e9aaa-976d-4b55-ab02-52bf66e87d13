@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { BarChart3, PieChart, Download, Share2, TrendingUp } from 'lucide-react';
 import { Poll } from '../lib/types';
 import { formatDate, calculatePercentage } from '../lib/utils';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart as RechartsPieChart, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart as RechartsPieChart, Pie, Cell } from 'recharts';
 
 interface ResultsDisplayProps {
   poll: Poll | null;
@@ -142,12 +142,19 @@ export function ResultsDisplay({ poll }: ResultsDisplayProps) {
                     cx="50%"
                     cy="50%"
                     outerRadius={100}
-                    dataKey="votes"
-                    label={({ name, percentage }) => `${name}: ${percentage}%`}
                   >
-                    {chartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.fill} />
-                    ))}
+                    <Pie
+                      data={chartData}
+                      dataKey="votes"
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={100}
+                      label={({ name, percentage }) => `${name}: ${percentage}%`}
+                    >
+                      {chartData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.fill} />
+                      ))}
+                    </Pie>
                   </RechartsPieChart>
                 </RechartsPieChart>
               )}

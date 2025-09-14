@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { FrameHeader } from '../components/FrameHeader';
+// import { FrameHeader } from '../components/FrameHeader';
 import { Navigation } from '../components/Navigation';
 import { VoterManagement } from '../components/VoterManagement';
 import { PollCreation } from '../components/PollCreation';
@@ -32,7 +32,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-6xl mx-auto">
-        <FrameHeader />
+        {/* <FrameHeader /> */}
         
         <div className="flex flex-col lg:flex-row">
           {/* Navigation Sidebar */}

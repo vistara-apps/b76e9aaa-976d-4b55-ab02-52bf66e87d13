@@ -9,13 +9,12 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@coinbase/minikit": "^0.1.0",
-    "@coinbase/onchainkit": "^0.30.0",
-    "next": "15.0.0",
+    "@coinbase/onchainkit": "^0.28.0",
+    "next": "14.2.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
-    "viem": "^2.0.0",
-    "wagmi": "^2.0.0",
+    "viem": "^2.17.11",
+    "wagmi": "^2.16.9",
     "lucide-react": "^0.400.0",
     "recharts": "^2.8.0",
     "pino-pretty": "^10.0.0"
@@ -26,7 +25,7 @@
     "@types/react-dom": "^18.0.0",
     "autoprefixer": "^10.0.0",
     "eslint": "^8.0.0",
-    "eslint-config-next": "15.0.0",
+    "eslint-config-next": "14.2.0",
     "postcss": "^8.0.0",
     "tailwindcss": "^3.4.0",
     "typescript": "^5.0.0"
