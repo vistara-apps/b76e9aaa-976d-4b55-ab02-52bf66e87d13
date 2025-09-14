@@ -28,32 +28,40 @@ export function VotingInterface({ poll }: VotingInterfaceProps) {
   }
 
   const submitVote = async () => {
-    if (!selectedOption || hasVoted) return;
+    if (!selectedOption || hasVoted || !poll) return;
 
     setIsVoting(true);
 
     try {
-      const vote: Vote = {
-        voteId: generateId(),
-        pollId: poll.pollId,
-        voterFid: '9152', // Mock voter FID
-        selectedOption,
-        votedAt: new Date(),
-      };
+      const response = await fetch('/api/votes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          pollId: poll.pollId,
+          voterFid: '9152', // Mock voter FID - in production, get from auth
+          selectedOption,
+        }),
+      });
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const data = await response.json();
 
-      // Update poll options with new vote
-      const updatedOptions = poll.options.map(option => 
-        option.id === selectedOption 
-          ? { ...option, votes: option.votes + 1 }
-          : option
-      );
+      if (data.success) {
+        // Refresh poll data to get updated vote counts
+        const pollResponse = await fetch(`/api/polls/${poll.pollId}`);
+        const pollData = await pollResponse.json();
 
-      poll.options = updatedOptions;
-      setHasVoted(true);
-      
+        if (pollData.success) {
+          // Update the poll with new data
+          Object.assign(poll, pollData.data);
+          setHasVoted(true);
+        }
+      } else {
+        console.error('Failed to submit vote:', data.error);
+        // You could add error state here
+      }
+
     } catch (error) {
       console.error('Failed to submit vote:', error);
     } finally {

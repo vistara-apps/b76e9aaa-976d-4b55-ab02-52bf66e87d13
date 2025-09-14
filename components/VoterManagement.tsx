@@ -1,30 +1,41 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, UserCheck, UserX, Search, Upload } from 'lucide-react';
 import { Voter, VoterStatus } from '../lib/types';
-import { generateId } from '../lib/utils';
 
 export function VoterManagement() {
-  const [voters, setVoters] = useState<Voter[]>([
-    {
-      voterId: '1',
-      fid: '9152',
-      walletAddress: '0x1234...5678',
-      statusTags: ['registered', 'eligible'],
-      displayName: 'Alice.eth',
-    },
-    {
-      voterId: '2',
-      fid: '8421',
-      walletAddress: '0x9876...4321',
-      statusTags: ['contacted'],
-      displayName: 'Bob.base',
-    },
-  ]);
+  const [voters, setVoters] = useState<Voter[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
   const [searchTerm, setSearchTerm] = useState('');
   const [newVoterFid, setNewVoterFid] = useState('');
+  const [isAdding, setIsAdding] = useState(false);
+
+  // Fetch voters on component mount
+  useEffect(() => {
+    fetchVoters();
+  }, []);
+
+  const fetchVoters = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/voters');
+      const data = await response.json();
+
+      if (data.success) {
+        setVoters(data.data);
+      } else {
+        setError(data.error || 'Failed to fetch voters');
+      }
+    } catch (err) {
+      setError('Failed to fetch voters');
+      console.error('Error fetching voters:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredVoters = voters.filter(voter =>
     voter.displayName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -32,30 +43,71 @@ export function VoterManagement() {
     voter.walletAddress?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const addVoter = () => {
+  const addVoter = async () => {
     if (!newVoterFid.trim()) return;
-    
-    const newVoter: Voter = {
-      voterId: generateId(),
-      fid: newVoterFid,
-      statusTags: ['registered'],
-      displayName: `User ${newVoterFid}`,
-    };
-    
-    setVoters([...voters, newVoter]);
-    setNewVoterFid('');
+
+    try {
+      setIsAdding(true);
+      const response = await fetch('/api/voters', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          fid: newVoterFid,
+          displayName: `User ${newVoterFid}`,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setVoters([...voters, data.data]);
+        setNewVoterFid('');
+      } else {
+        setError(data.error || 'Failed to add voter');
+      }
+    } catch (err) {
+      setError('Failed to add voter');
+      console.error('Error adding voter:', err);
+    } finally {
+      setIsAdding(false);
+    }
   };
 
-  const updateVoterStatus = (voterId: string, status: VoterStatus) => {
-    setVoters(voters.map(voter => {
-      if (voter.voterId === voterId) {
-        const newTags = voter.statusTags.includes(status)
-          ? voter.statusTags.filter(tag => tag !== status)
-          : [...voter.statusTags, status];
-        return { ...voter, statusTags: newTags };
+  const updateVoterStatus = async (voterId: string, status: VoterStatus) => {
+    try {
+      const voter = voters.find(v => v.voterId === voterId);
+      if (!voter) return;
+
+      const newTags = voter.statusTags.includes(status)
+        ? voter.statusTags.filter(tag => tag !== status)
+        : [...voter.statusTags, status];
+
+      const response = await fetch('/api/voters', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          voterId,
+          statusTags: newTags,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setVoters(voters.map(v =>
+          v.voterId === voterId ? data.data : v
+        ));
+      } else {
+        setError(data.error || 'Failed to update voter status');
       }
-      return voter;
-    }));
+    } catch (err) {
+      setError('Failed to update voter status');
+      console.error('Error updating voter status:', err);
+    }
   };
 
   const getStatusColor = (status: VoterStatus) => {
@@ -68,6 +120,18 @@ export function VoterManagement() {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <h2 className="text-2xl font-bold text-foreground">Record Voters</h2>
+        <div className="card text-center py-12">
+          <div className="w-8 h-8 border-4 border-civic-blue border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading voters...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -77,6 +141,18 @@ export function VoterManagement() {
           <span>Import List</span>
         </button>
       </div>
+
+      {error && (
+        <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-red-800">{error}</p>
+          <button
+            onClick={() => setError(null)}
+            className="mt-2 text-sm text-red-600 hover:text-red-800"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
 
       {/* Add New Voter */}
       <div className="card">
@@ -91,10 +167,15 @@ export function VoterManagement() {
           />
           <button
             onClick={addVoter}
-            className="btn-primary flex items-center space-x-2"
+            disabled={isAdding}
+            className="btn-primary flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <Plus className="h-4 w-4" />
-            <span>Add</span>
+            {isAdding ? (
+              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : (
+              <Plus className="h-4 w-4" />
+            )}
+            <span>{isAdding ? 'Adding...' : 'Add'}</span>
           </button>
         </div>
       </div>
