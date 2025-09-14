@@ -1,0 +1,30 @@
+{
+  "accountAssociation": {
+    "header": "",
+    "payload": "",
+    "signature": ""
+  },
+  "frame": {
+    "version": "1",
+    "name": "Civic Ballot",
+    "subtitle": "Built with Zara",
+    "description": "Civic Ballot is a Base Mini App built with Zara.",
+    "iconUrl": "https://0co.to/images/zara-2.png",
+    "homeUrl": "https://b76e9aaa976d4b55ab0252bf66e87d13-panw.vercel.app",
+    "splashImageUrl": "https://b76e9aaa976d4b55ab0252bf66e87d13-panw.vercel.app/splash.png",
+    "splashBackgroundColor": "#000000",
+    "heroImageUrl": "https://b76e9aaa976d4b55ab0252bf66e87d13-panw.vercel.app/image.png",
+    "tagline": "Civic Ballot",
+    "screenshotUrls": [
+      "https://b76e9aaa976d4b55ab0252bf66e87d13-panw.vercel.app/screenshot.png",
+      "https://b76e9aaa976d4b55ab0252bf66e87d13-panw.vercel.app/screenshot.png"
+    ],
+    "primaryCategory": "social",
+    "tags": [
+      "base",
+      "miniapp",
+      "onchainkit"
+    ],
+    "webhookUrl": "https://b76e9aaa976d4b55ab0252bf66e87d13-panw.vercel.app/api/webhook"
+  }
+}
