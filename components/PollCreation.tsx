@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Plus, X, Save, Share2 } from 'lucide-react';
 import { Poll, PollOption } from '../lib/types';
-import { generateId, validatePollData } from '../lib/utils';
+import { validatePollData } from '../lib/utils';
 
 interface PollCreationProps {
   onPollCreated: (poll: Poll) => void;
@@ -36,7 +36,7 @@ export function PollCreation({ onPollCreated }: PollCreationProps) {
 
   const createPoll = async () => {
     setError(null);
-    
+
     const validationError = validatePollData(title, options);
     if (validationError) {
       setError(validationError);
@@ -46,36 +46,35 @@ export function PollCreation({ onPollCreated }: PollCreationProps) {
     setIsCreating(true);
 
     try {
-      const pollOptions: PollOption[] = options
-        .filter(opt => opt.trim())
-        .map(opt => ({
-          id: generateId(),
-          text: opt.trim(),
-          votes: 0,
-        }));
+      const response = await fetch('/api/polls', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: title.trim(),
+          description: description.trim(),
+          options: options.filter(opt => opt.trim()),
+          organizerFid: '9152', // Mock organizer FID - in production, get from auth
+        }),
+      });
 
-      const newPoll: Poll = {
-        pollId: generateId(),
-        organizerFid: '9152', // Mock organizer FID
-        title: title.trim(),
-        description: description.trim(),
-        options: pollOptions,
-        createdAt: new Date(),
-        status: 'active',
-      };
+      const data = await response.json();
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      if (data.success) {
+        onPollCreated(data.data);
 
-      onPollCreated(newPoll);
-      
-      // Reset form
-      setTitle('');
-      setDescription('');
-      setOptions(['', '']);
-      
+        // Reset form
+        setTitle('');
+        setDescription('');
+        setOptions(['', '']);
+      } else {
+        setError(data.error || 'Failed to create poll');
+      }
+
     } catch (err) {
       setError('Failed to create poll. Please try again.');
+      console.error('Error creating poll:', err);
     } finally {
       setIsCreating(false);
     }
