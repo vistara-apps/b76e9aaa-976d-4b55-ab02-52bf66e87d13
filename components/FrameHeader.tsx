@@ -1,13 +1,9 @@
 'use client';
 
-import { useMiniKit } from '@coinbase/minikit';
-import { Identity } from '@coinbase/onchainkit/identity';
 import { Wallet } from '@coinbase/onchainkit/wallet';
-import { Vote, Users } from 'lucide-react';
+import { Vote } from 'lucide-react';
 
 export function FrameHeader() {
-  const { user } = useMiniKit();
-
   return (
     <header className="bg-civic-blue text-white p-4 shadow-lg">
       <div className="flex items-center justify-between">
@@ -20,19 +16,11 @@ export function FrameHeader() {
             <p className="text-sm text-white/80">Secure Community Voting</p>
           </div>
         </div>
-        
+
         <div className="flex items-center space-x-4">
-          {user && (
-            <div className="flex items-center space-x-2">
-              <Identity 
-                address={user.address}
-                className="text-white"
-              />
-            </div>
-          )}
-          <Wallet className="text-white">
+          <Wallet>
             <div className="bg-white/20 hover:bg-white/30 px-3 py-2 rounded-md transition-colors duration-200">
-              Connect
+              Connect Wallet
             </div>
           </Wallet>
         </div>
